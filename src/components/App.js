@@ -1,3 +1,4 @@
+import React from "react";
 import Header from "./Header";
 import Main from "./Main";
 import Footer from "./Footer";
@@ -5,12 +6,56 @@ import PopupWithForm from "./PopupWithForm";
 import ImagePopup from "./ImagePopup";
 
 function App() {
+
+  const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = React.useState(false);
+  const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = React.useState(false);
+  const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = React.useState(false);
+  const [isPreviewPopupOpen, setIsPreviewPopupOpen] = React.useState(false);
+  const [selectedCard, setSelectedCard] = React.useState({});
+  
+  const handleEditAvatarClick = () => {
+    setIsEditAvatarPopupOpen(true);
+  }
+
+  const handleEditProfileClick = () => {
+    setIsEditProfilePopupOpen(true);
+  }
+
+  const handleAddPlaceClick = () => {
+    setIsAddPlacePopupOpen(true);
+  }
+
+  const closeAllPopups = () => {
+    setIsEditAvatarPopupOpen(false);
+    setIsEditProfilePopupOpen(false);
+    setIsAddPlacePopupOpen(false);
+    setIsPreviewPopupOpen(false);
+    setSelectedCard({});
+  }
+
+  const handleCardClick = (evt) => {
+    setSelectedCard({
+      name: evt.target.getAttribute('alt'),
+      link: evt.target.getAttribute('src')});
+
+      setIsPreviewPopupOpen(true);
+  }
+
   return (
     <>
       <Header/>
-      <Main/>
+      <Main 
+        onEditProfile={handleEditProfileClick}
+        onAddPlace={handleAddPlaceClick}
+        onEditAvatar={handleEditAvatarClick}
+        onCardClick={handleCardClick}
+        onClose={closeAllPopups}/>
       <Footer/>
-      <PopupWithForm name="profile" title="Редактировать профиль" buttonTitle="Сохранить">
+      <PopupWithForm 
+        name="profile" 
+        title="Редактировать профиль" 
+        buttonTitle="Сохранить"
+        isOpen={isEditProfilePopupOpen}>
         <input 
             id="author-name"
             type="text" 
@@ -32,7 +77,11 @@ function App() {
             placeholder="О себе"/>
           <span className="popup-edit__error author-option-error"></span>
       </PopupWithForm>
-      <PopupWithForm name="place" title="Новое место" buttonTitle="Создать">
+      <PopupWithForm 
+        name="place" 
+        title="Новое место" 
+        buttonTitle="Создать"
+        isOpen={isAddPlacePopupOpen}>
         <input
           id="place-name" 
           type="text" 
@@ -52,7 +101,11 @@ function App() {
           placeholder="Ссылка на картинку"/>
         <span className="popup-edit__error place-option-error"></span>
       </PopupWithForm>
-      <PopupWithForm name="avatar" title="Обновить аватар" buttonTitle="Сохранить">
+      <PopupWithForm 
+        name="avatar" 
+        title="Обновить аватар" 
+        buttonTitle="Сохранить"
+        isOpen={isEditAvatarPopupOpen}>
         <input
           id="avatar-option" 
           type="url" 
@@ -63,21 +116,7 @@ function App() {
         <span className="popup-edit__error avatar-option-error"></span>
       </PopupWithForm>
       <PopupWithForm name="confirm" title="Вы уверены?" buttonTitle="Да"/>
-      <ImagePopup/>
-      
-      <template id="card-template">
-        <li className="card">
-          <img src="#" className="card__image" alt="#"/>
-          <button className="card__delete-button button" type="button" aria-label="Удалить"></button>
-          <div className="card__content">
-            <h2 className="card__title">#</h2>
-            <div className="card__like-container">
-              <button className="card__like-button" type="button" aria-label="Лайк"></button>
-              <span className="card__like-count">0</span>
-            </div>
-          </div>
-        </li>
-      </template>
+      <ImagePopup card={selectedCard} isOpen={isPreviewPopupOpen}/>
     </>
   );
 }
