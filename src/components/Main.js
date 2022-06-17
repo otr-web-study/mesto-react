@@ -1,21 +1,14 @@
-import React from "react";
+import {useState, useEffect} from "react";
 import api from "../utils/Api";
 import Card from "./Card";
 
-function Main(props) {
-  const [userName, setUserName] = React.useState('');
-  const [userDescription, setUserDescription] = React.useState('');
-  const [userAvatar, setUserAvatar] = React.useState('');
-  const [cards, setCards] = React.useState([]);
+function Main({onEditAvatar, onEditProfile, onAddPlace, onCardClick}) {
+  const [userName, setUserName] = useState('');
+  const [userDescription, setUserDescription] = useState('');
+  const [userAvatar, setUserAvatar] = useState('');
+  const [cards, setCards] = useState([]);
 
-  React.useEffect(() => {
-    document.querySelector('.profile__avatar-edit-button').addEventListener('click', props.onEditAvatar);
-    document.querySelector('.profile__edit-button').addEventListener('click', props.onEditProfile);
-    document.querySelector('.profile__add-button').addEventListener('click', props.onAddPlace);
-    document.querySelectorAll('.popup__close-button').forEach((item) => {
-      item.addEventListener('click', props.onClose);
-    });
-
+  useEffect(() => {
     api.batchFetch([api.getInitialCards(), api.getUserData()])
       .then(([initialCards, { name, about, avatar }]) => {
         setUserName(name);
@@ -26,10 +19,9 @@ function Main(props) {
       })
       .catch(err => {console.log(err)});
       }, [
-        props.onEditAvatar,
-        props.onEditProfile,
-        props.onAddPlace,
-        props.onClose
+        onEditAvatar,
+        onEditProfile,
+        onAddPlace
       ]);
 
   return (
@@ -37,21 +29,33 @@ function Main(props) {
       <section className="profile page__profile">
         <div className="profile__avatar-container">
           <img className="profile__avatar" src={userAvatar} alt="Фото профиля пользователя."/>
-          <button className="profile__avatar-edit-button" type="button" aria-label="Редактировать"></button>
+          <button 
+            className="profile__avatar-edit-button" 
+            type="button" 
+            aria-label="Редактировать"
+            onClick={onEditAvatar}></button>
         </div>
         <div className="profile__info">
           <div className="profile__author-container">
             <h1 className="profile__author">{userName}</h1>
-            <button className="profile__edit-button button" type="button" aria-label="Редактировать"></button>
+            <button 
+              className="profile__edit-button button" 
+              type="button" 
+              aria-label="Редактировать"
+              onClick={onEditProfile}></button>
           </div>
           <p className="profile__bio">{userDescription}</p>       
         </div>
-        <button className="profile__add-button button" type="button" aria-label="Добавить"></button>
+        <button 
+          className="profile__add-button button" 
+          type="button" 
+          aria-label="Добавить"
+          onClick={onAddPlace}></button>
       </section>
       <section className="elements page__elements">
         <ul className="elements__list">
           {cards.map(item => {
-            return <Card card={item} key={item._id} onClick={props.onCardClick} />;
+            return <Card card={item} key={item._id} onClick={onCardClick}/>;
           })}
         </ul>
       </section>
