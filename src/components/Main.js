@@ -18,11 +18,7 @@ function Main({onEditAvatar, onEditProfile, onAddPlace, onCardClick}) {
         setCards(initialCards);
       })
       .catch(err => {console.log(err)});
-      }, [
-        onEditAvatar,
-        onEditProfile,
-        onAddPlace
-      ]);
+      }, []);
 
   return (
     <main>
