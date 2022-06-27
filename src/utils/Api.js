@@ -54,6 +54,13 @@ class Api {
     });
   }
 
+  handleLikeCardStatus(cardId, isLiked) {
+    if (isLiked) {
+      return this.unlikeCard(cardId);
+    }
+    return this.likeCard(cardId);
+  }
+
   likeCard(cardId) {
     return this._fetchData(`${this._baseUrl}/cards/${cardId}/likes`, {
       method: 'PUT',

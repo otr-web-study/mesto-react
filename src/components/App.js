@@ -1,9 +1,12 @@
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import Header from "./Header";
 import Main from "./Main";
 import Footer from "./Footer";
 import PopupWithForm from "./PopupWithForm";
 import ImagePopup from "./ImagePopup";
+import EditProfilePopup from "./EditProfilePopup";
+import api from "../utils/Api";
+import { CurrentUserContext } from "../contexts/CurrentUserContext";
 
 function App() {
 
@@ -12,6 +15,15 @@ function App() {
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
   const [isPreviewPopupOpen, setIsPreviewPopupOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState({});
+  const [currentUser, setCurrentUser] = useState({});
+
+  useEffect(() => {
+    api.getUserData()
+      .then((userData) => {
+        setCurrentUser(userData);
+      })
+      .catch(err => {console.log(err)});
+      }, []);
   
   const handleEditAvatarClick = () => {
     setIsEditAvatarPopupOpen(true);
@@ -39,8 +51,16 @@ function App() {
     setIsPreviewPopupOpen(true);
   }
 
+  const handleUpdateUser = (userData) => {
+    api.updateUserData(userData)
+      .then((currentUser) => {
+        setCurrentUser(currentUser);
+      })
+      .catch(err => {console.log(err)});
+  }
+
   return (
-    <>
+    <CurrentUserContext.Provider value={currentUser}>
       <Header/>
       <Main 
         onEditProfile={handleEditProfileClick}
@@ -48,33 +68,10 @@ function App() {
         onEditAvatar={handleEditAvatarClick}
         onCardClick={handleCardClick}/>
       <Footer/>
-      <PopupWithForm 
-        name="profile" 
-        title="Редактировать профиль" 
-        buttonTitle="Сохранить"
-        isOpen={isEditProfilePopupOpen}
-        onClose={closeAllPopups}>
-        <input 
-            id="author-name"
-            type="text" 
-            className="popup-edit__input popup-edit__input_type_name" 
-            name="name"
-            required
-            minLength="2"
-            maxLength="40"
-            placeholder="Имя"/>
-          <span className="popup-edit__error author-name-error"></span>
-          <input 
-            id="author-option"
-            type="text" 
-            className="popup-edit__input popup-edit__input_type_option" 
-            name="about"
-            required
-            minLength="2"
-            maxLength="200"
-            placeholder="О себе"/>
-          <span className="popup-edit__error author-option-error"></span>
-      </PopupWithForm>
+      <EditProfilePopup 
+        isOpen={isEditProfilePopupOpen} 
+        onClose={closeAllPopups} 
+        onUpdateUser={handleUpdateUser} />
       <PopupWithForm 
         name="place" 
         title="Новое место" 
@@ -117,7 +114,7 @@ function App() {
       </PopupWithForm>
       <PopupWithForm name="confirm" title="Вы уверены?" buttonTitle="Да" onClose={closeAllPopups}/>
       <ImagePopup card={selectedCard} isOpen={isPreviewPopupOpen} onClose={closeAllPopups}/>
-    </>
+    </CurrentUserContext.Provider>
   );
 }
 
