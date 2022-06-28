@@ -2,7 +2,7 @@ import PopupWithForm from "./PopupWithForm";
 import {useState,  useContext, useEffect} from "react";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
 
-function EditProfilePopup({isOpen, onClose, onUpdateUser}) {
+function EditProfilePopup({isOpen, isInAction, onClose, onUpdateUser}) {
   const currentUser = useContext(CurrentUserContext);
   const [name, setName] = useState('1');
   const [description, setDescription] = useState('2');
@@ -34,6 +34,7 @@ function EditProfilePopup({isOpen, onClose, onUpdateUser}) {
       name="profile" 
       title="Редактировать профиль" 
       buttonTitle="Сохранить"
+      buttonTitleInAction="Сохранение..."
       isOpen={isOpen}
       onClose={onClose}
       onSubmit={handleSubmit}>
@@ -61,6 +62,9 @@ function EditProfilePopup({isOpen, onClose, onUpdateUser}) {
           value={description}
           onChange={handleDescriptionChange} />
       <span className="popup-edit__error author-option-error"></span>
+      <button className="popup-edit__button-save" type="submit" onClick={handleSubmit}>
+        {isInAction ? "Сохранение...": "Сохранить"}
+      </button>
     </PopupWithForm>
   )
 }
