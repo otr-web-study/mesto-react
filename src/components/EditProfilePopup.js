@@ -1,33 +1,29 @@
 import PopupWithForm from "./PopupWithForm";
-import {useState,  useContext, useEffect} from "react";
-import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import {useContext, useEffect} from "react";
+import {CurrentUserContext} from "../contexts/CurrentUserContext";
+import {useInputWithValidation} from "../utils/FormValidator";
 
-function EditProfilePopup({isOpen, isInAction, onClose, onUpdateUser}) {
+function EditProfilePopup({isOpen, isInAction, onMouseDown, onUpdateUser}) {
   const currentUser = useContext(CurrentUserContext);
-  const [name, setName] = useState('1');
-  const [description, setDescription] = useState('2');
+
+  const name = useInputWithValidation('');
+  const description = useInputWithValidation('');
 
   useEffect(() => {
-    setName(currentUser.name);
-    setDescription(currentUser.about);
+    name.setValue(currentUser.name || '');
+    description.setValue(currentUser.about || '');
   }, [currentUser]);
-
-  function handleNameChange(evt) {
-    setName(evt.target.value);
-  }
-
-  function handleDescriptionChange(evt) {
-    setDescription(evt.target.value);
-  }
 
   function handleSubmit(evt) {
     evt.preventDefault();
 
     onUpdateUser({
-      name,
-      about: description,
+      name: name.value,
+      about: description.value,
     });
   }
+
+  const isFormValid = ![name, description].filter(input => !input.isFormValid);
 
   return (
     <PopupWithForm 
@@ -36,33 +32,41 @@ function EditProfilePopup({isOpen, isInAction, onClose, onUpdateUser}) {
       buttonTitle="Сохранить"
       buttonTitleInAction="Сохранение..."
       isOpen={isOpen}
-      onClose={onClose}
+      onMouseDown={onMouseDown}
       onSubmit={handleSubmit}>
       <input 
-          id="author-name"
-          type="text" 
-          className="popup-edit__input popup-edit__input_type_name" 
-          name="name"
-          required
-          minLength="2"
-          maxLength="40"
-          placeholder="Имя"
-          value={name}
-          onChange={handleNameChange} />
-        <span className="popup-edit__error author-name-error"></span>
-        <input 
-          id="author-option"
-          type="text" 
-          className="popup-edit__input popup-edit__input_type_option" 
-          name="about"
-          required
-          minLength="2"
-          maxLength="200"
-          placeholder="О себе"
-          value={description}
-          onChange={handleDescriptionChange} />
-      <span className="popup-edit__error author-option-error"></span>
-      <button className="popup-edit__button-save" type="submit" onClick={handleSubmit}>
+        id="author-name"
+        type="text" 
+        className="popup-edit__input popup-edit__input_type_name" 
+        name="name"
+        required
+        minLength="2"
+        maxLength="40"
+        placeholder="Имя"
+        value={name.value}
+        onChange={name.onChange}/>
+      <span className={`popup-edit__error author-name-error ${!name.isValid && 'popup-edit__error_active'}`}>
+        {!name.isValid && name.validationMessage}
+      </span>
+      <input 
+        id="author-option"
+        type="text" 
+        className="popup-edit__input popup-edit__input_type_option" 
+        name="about"
+        required
+        minLength="2"
+        maxLength="200"
+        placeholder="О себе"
+        value={description.value}
+        onChange={description.onChange}/>
+      <span className={`popup-edit__error author-option-error ${!description.isValid && 'popup-edit__error_active'}`}>
+        {!description.isValid && description.validationMessage}
+      </span>
+      <button 
+        className={`popup-edit__button-save ${!isFormValid && 'popup-edit__button-save_inactive'}`}
+        type="submit" 
+        onClick={handleSubmit}
+        disabled={!isFormValid}>
         {isInAction ? "Сохранение...": "Сохранить"}
       </button>
     </PopupWithForm>
