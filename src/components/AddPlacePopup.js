@@ -1,26 +1,20 @@
 import PopupWithForm from "./PopupWithForm";
-import {useState} from "react";
+import {useInputWithValidation, useFormValid} from "../utils/FormValidators";
 
 function AddPlacePopup({isOpen, isInAction, onMouseDown, onAddPlaceSubmit}) {
-  const [link, setLink] = useState('');
-  const [name, setName] = useState('');
+  const link = useInputWithValidation('', isOpen);
+  const name = useInputWithValidation('', isOpen);
 
   function handleSubmit(evt) {
     evt.preventDefault();
 
     onAddPlaceSubmit({
-      link,
-      name,
-    })
+      link: link.value,
+      name: name.value,
+    });
   }
 
-  function handleLinkChange(evt) {
-    setLink(evt.target.value);
-  }
-
-  function handleNameChange(evt) {
-    setName(evt.target.value);
-  }
+  const [isFormValid] = useFormValid([link, name]);
 
   return (
     <PopupWithForm 
@@ -37,9 +31,11 @@ function AddPlacePopup({isOpen, isInAction, onMouseDown, onAddPlaceSubmit}) {
           minLength="2"
           maxLength="30"
           placeholder="Название"
-          value={name}
-          onChange={handleNameChange}/>
-        <span className="popup-edit__error place-name-error"></span>
+          value={name.value}
+          onChange={name.onChange}/>
+        <span className={`popup-edit__error place-name-error ${!name.isValid && 'popup-edit__error_active'}`}>
+          {!name.isValid && name.validationMessage}
+        </span>
         <input
           id="place-option" 
           type="url" 
@@ -47,10 +43,16 @@ function AddPlacePopup({isOpen, isInAction, onMouseDown, onAddPlaceSubmit}) {
           name="link"
           required
           placeholder="Ссылка на картинку"
-          value={link}
-          onChange={handleLinkChange}/>
-        <span className="popup-edit__error place-option-error"></span>
-        <button className="popup-edit__button-save" type="submit" onClick={handleSubmit}>
+          value={link.value}
+          onChange={link.onChange}/>
+        <span className={`popup-edit__error place-option-error ${!link.isValid && 'popup-edit__error_active'}`}>
+          {!link.isValid && link.validationMessage}
+        </span>
+        <button 
+          className={`popup-edit__button-save ${!isFormValid && 'popup-edit__button-save_inactive'}`}
+          type="submit" 
+          onClick={handleSubmit}
+          disabled={!isFormValid}>
           {isInAction ? "Добавление...": "Создать"}
         </button>
       </PopupWithForm>

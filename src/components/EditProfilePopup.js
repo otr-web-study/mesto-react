@@ -1,18 +1,20 @@
 import PopupWithForm from "./PopupWithForm";
 import {useContext, useEffect} from "react";
 import {CurrentUserContext} from "../contexts/CurrentUserContext";
-import {useInputWithValidation} from "../utils/FormValidator";
+import {useInputWithValidation, useFormValid} from "../utils/FormValidators";
 
 function EditProfilePopup({isOpen, isInAction, onMouseDown, onUpdateUser}) {
   const currentUser = useContext(CurrentUserContext);
 
-  const name = useInputWithValidation('');
-  const description = useInputWithValidation('');
+  const name = useInputWithValidation('', isOpen);
+  const description = useInputWithValidation('', isOpen);
 
   useEffect(() => {
     name.setValue(currentUser.name || '');
+    name.setIsRedacted(true);
     description.setValue(currentUser.about || '');
-  }, [currentUser]);
+    description.setIsRedacted(true);
+  }, [currentUser, isOpen]);
 
   function handleSubmit(evt) {
     evt.preventDefault();
@@ -23,7 +25,7 @@ function EditProfilePopup({isOpen, isInAction, onMouseDown, onUpdateUser}) {
     });
   }
 
-  const isFormValid = ![name, description].filter(input => !input.isFormValid);
+  const [isFormValid] = useFormValid([name, description]);
 
   return (
     <PopupWithForm 

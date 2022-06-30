@@ -1,16 +1,18 @@
 import PopupWithForm from "./PopupWithForm";
-import {useRef} from "react";
+import {useInputRefWithValidation, useFormValid} from "../utils/FormValidators";
 
 function EditAvatarPopup({isOpen, isInAction, onMouseDown, onUpdateAvatar}) {
-  const urlRef = useRef();
+  const url = useInputRefWithValidation('', isOpen);
 
   function handleSubmit(evt) {
     evt.preventDefault();
 
     onUpdateAvatar({
-      avatar: urlRef.current.value,
+      avatar: url.ref.current.value,
     });
   }
+
+  const [isFormValid] = useFormValid([url]);
   
   return (
     <PopupWithForm 
@@ -20,15 +22,22 @@ function EditAvatarPopup({isOpen, isInAction, onMouseDown, onUpdateAvatar}) {
         onMouseDown={onMouseDown}
         onSubmit={handleSubmit}>
         <input
-          ref={urlRef}
+          ref={url.ref}
           id="avatar-option" 
           type="url" 
           className="popup-edit__input popup-edit__input_type_option-avatar"  
           name="link"
           required
-          placeholder="Ссылка на картинку"/>
-        <span className="popup-edit__error avatar-option-error"></span>
-        <button className="popup-edit__button-save" type="submit" onClick={handleSubmit}>
+          placeholder="Ссылка на картинку"
+          onChange={url.onChange}/>
+        <span className={`popup-edit__error avatar-option-error ${!url.isValid && 'popup-edit__error_active'}`}>
+          {!url.isValid && url.validationMessage}
+        </span>
+        <button 
+          className={`popup-edit__button-save ${!isFormValid && 'popup-edit__button-save_inactive'}`} 
+          type="submit" 
+          onClick={handleSubmit}
+          disabled={!isFormValid}>
           {isInAction ? "Сохранение...": "Сохранить"}
         </button>
       </PopupWithForm>
