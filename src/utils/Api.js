@@ -2,9 +2,7 @@ class Api {
   constructor(config) {
     this._baseUrl = config.baseUrl;
     this._headers = config.headers;
-    this._headersExt = Object.assign({}, this._headers, {
-      'Content-Type': 'application/json'
-    });
+    this._headersExt = {...this._headers, ...{"Content-Type": "application/json"}};
   }
 
   _handleResponse(res) {
@@ -33,7 +31,7 @@ class Api {
 
   updateUserData(userData) {
     return this._fetchData(`${this._baseUrl}/users/me`, {
-      method: 'PATCH',
+      method: "PATCH",
       headers: this._headersExt,
       body: JSON.stringify(userData)
     });
@@ -41,7 +39,7 @@ class Api {
 
   addNewCard(cardData) { 
     return this._fetchData(`${this._baseUrl}/cards`, {
-      method: 'POST',
+      method: "POST",
       headers: this._headersExt,
       body: JSON.stringify(cardData)
     });
@@ -49,7 +47,7 @@ class Api {
 
   deleteCard(cardId) {
     return this._fetchData(`${this._baseUrl}/cards/${cardId}`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: this._headers
     });
   }
@@ -63,21 +61,21 @@ class Api {
 
   likeCard(cardId) {
     return this._fetchData(`${this._baseUrl}/cards/${cardId}/likes`, {
-      method: 'PUT',
+      method: "PUT",
       headers: this._headers
     });
   }
 
   unlikeCard(cardId) {
     return this._fetchData(`${this._baseUrl}/cards/${cardId}/likes`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: this._headers
     });
   }
 
   updateUserAvatar(userAvatarData) {
     return this._fetchData(`${this._baseUrl}/users/me/avatar`,{
-      method: 'PATCH',
+      method: "PATCH",
       headers: this._headersExt,
       body: JSON.stringify(userAvatarData)
     });

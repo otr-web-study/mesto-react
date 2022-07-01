@@ -1,4 +1,4 @@
-import {useState, useEffect, useRef} from 'react';
+import {useState, useEffect, useRef} from "react";
 
 export const useInputWithValidation = (initialValue, isOpen) => {
   const [value, setValue] = useState(initialValue);
@@ -8,17 +8,25 @@ export const useInputWithValidation = (initialValue, isOpen) => {
 
   useEffect(() => {
     if (!isOpen) {
-      setValue(initialValue);
-      setIsRedacted(false);
-      setIsValid(true);
+      resetInput();
     }
   }, [isOpen]);
 
   const onChange = (evt) => {
-    setValue(evt.target.value);
-    setIsRedacted(true);
+    changeValue(evt.target.value);
     setIsValid(evt.target.validity.valid);
     setValidationMessage(evt.target.validationMessage);
+  }
+
+  const changeValue = (newValue) => {
+    setValue(newValue);
+    setIsRedacted(true);
+  }
+
+  const resetInput = () => {
+    setValue(initialValue);
+    setIsRedacted(true);
+    setIsValid(true);
   }
 
   return {
@@ -27,8 +35,7 @@ export const useInputWithValidation = (initialValue, isOpen) => {
     isRedacted,
     validationMessage,
     onChange,
-    setValue,
-    setIsRedacted,
+    "setValue": changeValue,
   }
 }
 
@@ -40,9 +47,7 @@ export const useInputRefWithValidation = (initialValue, isOpen) => {
 
   useEffect(() => {
     if (!isOpen) {
-      ref.current.value = initialValue;
-      setIsRedacted(false);
-      setIsValid(true);
+      resetInput();
     }
   }, [isOpen]);
 
@@ -50,6 +55,12 @@ export const useInputRefWithValidation = (initialValue, isOpen) => {
     setIsRedacted(true);
     setIsValid(evt.target.validity.valid);
     setValidationMessage(evt.target.validationMessage);
+  }
+
+  const resetInput = () => {
+    ref.current.value = initialValue;
+    setIsRedacted(false);
+    setIsValid(true);
   }
 
   return {
@@ -60,14 +71,13 @@ export const useInputRefWithValidation = (initialValue, isOpen) => {
     onChange,
     setIsRedacted,
   }
-
 }
 
 export const useFormValid = (inputs) => {
   const [isFormValid, setIsFormValid] = useState(false);
 
   useEffect(() => {
-    setIsFormValid(inputs.filter((input) => !input.isRedacted || !input.isValid).length === 0);
+    setIsFormValid(!inputs.some((input) => !input.isRedacted || !input.isValid));
   }, inputs);
 
   return [isFormValid, setIsFormValid];

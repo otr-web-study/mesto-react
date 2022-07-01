@@ -5,6 +5,17 @@ import { CurrentUserContext } from "../contexts/CurrentUserContext";
 function Main({cards, onEditAvatar, onEditProfile, onAddPlace, onCardClick, onCardLike, onCardDelete}) {
   const currentUser = useContext(CurrentUserContext);
 
+  const cardsElement = cards.map(item => {
+    return (
+      <li key={item._id} className="card">
+        <Card 
+          card={item} 
+          onImageClick={onCardClick} 
+          onCardLike={onCardLike}
+          onCardDelete={onCardDelete}/>
+      </li>
+    )});
+
   return (
     <main>
       <section className="profile page__profile">
@@ -35,14 +46,7 @@ function Main({cards, onEditAvatar, onEditProfile, onAddPlace, onCardClick, onCa
       </section>
       <section className="elements page__elements">
         <ul className="elements__list">
-          {cards.map(item => {
-            return <Card 
-                    card={item} 
-                    key={item._id} 
-                    onClick={onCardClick} 
-                    onCardLike={onCardLike}
-                    onCardDelete={onCardDelete}/>;
-          })}
+          {cardsElement}
         </ul>
       </section>
     </main>

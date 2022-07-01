@@ -11,14 +11,12 @@ import api from "../utils/Api";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
 
 function App() {
-
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
-  const [isPreviewPopupOpen, setIsPreviewPopupOpen] = useState(false);
-  const [isConfirmPopupOpen, setIsConfirmPopupOpen] = useState(false);
-  const [isPopupInAction, setIsPopupInAction] = useState(false);
-  const [selectedCard, setSelectedCard] = useState({});
+  const [isPendingServerResponse, setIsPendingServerResponse] = useState(false);
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [deletedCard, setDeletedCard] = useState(null);
   const [currentUser, setCurrentUser] = useState({});
   const [cards, setCards] = useState([]);
 
@@ -29,8 +27,8 @@ function App() {
         setCards(initialCards);
       })
       .catch(err => {console.log(err)});
-      }, []);
-  
+  }, []);
+
   const handleEditAvatarClick = () => {
     setIsEditAvatarPopupOpen(true);
   }
@@ -47,38 +45,28 @@ function App() {
     setIsEditAvatarPopupOpen(false);
     setIsEditProfilePopupOpen(false);
     setIsAddPlacePopupOpen(false);
-    setIsPreviewPopupOpen(false);
-    setIsConfirmPopupOpen(false);
-    setSelectedCard({});
-  }
-
-  const handlePopupMouseDown = (evt) => {
-    if (evt.target.classList.contains('popup__close-button')
-        || evt.target.classList.contains('popup')) {
-      closeAllPopups();
-    }
+    setSelectedCard(null);
+    setDeletedCard(null);
   }
 
   const handleCardClick = (cardData) => {
     setSelectedCard(cardData);
-    
-    setIsPreviewPopupOpen(true);
   }
 
   const handleUpdateUser = (userData) => {
-    setIsPopupInAction(true);
+    setIsPendingServerResponse(true);
 
     api.updateUserData(userData)
       .then((newUser) => {
         setCurrentUser(newUser);
         setIsEditProfilePopupOpen(false);
-        setIsPopupInAction(false);
       })
-      .catch(err => {console.log(err)});
+      .catch(err => {console.log(err)})
+      .finally(() => {setIsPendingServerResponse(false)})
   }
 
   const handleUpdateAvatar = (avatarData) => {
-    setIsPopupInAction(true);
+    setIsPendingServerResponse(true);
 
     api.updateUserAvatar(avatarData)
       .then((newUser) => {
@@ -86,11 +74,11 @@ function App() {
         setIsEditAvatarPopupOpen(false);
       })
       .catch(err => {console.log(err)})
-      .finally(() => {setIsPopupInAction(false)});
+      .finally(() => {setIsPendingServerResponse(false)});
   }
 
   const handleAddPlaceSubmit = (placeData) => {
-    setIsPopupInAction(true);
+    setIsPendingServerResponse(true);
 
     api.addNewCard(placeData)
       .then((newCard) => {
@@ -98,12 +86,12 @@ function App() {
         setIsAddPlacePopupOpen(false);
       })
       .catch(err => {console.log(err)})
-      .finally(() => {setIsPopupInAction(false)});
+      .finally(() => {setIsPendingServerResponse(false)});
   }
 
   function handleCardLike(card) {
     const isLiked = card.likes.some(item => item._id === currentUser._id);
-    
+
     api.handleLikeCardStatus(card._id, isLiked)
       .then((newCard) => {
         setCards(cards.map((item) => item._id === card._id ? newCard : item));
@@ -112,61 +100,59 @@ function App() {
   }
 
   function handleCardDelete(card) {
-    setSelectedCard(card);
-    setIsConfirmPopupOpen(true);
+    setDeletedCard(card);
   }
 
   const handleConfirmCardDelete = (evt) => {
     evt.preventDefault();
-    setIsPopupInAction(true);
+    setIsPendingServerResponse(true);
 
-    api.deleteCard(selectedCard._id)
+    api.deleteCard(deletedCard._id)
       .then(() => {
-        setCards(cards.filter(item => item._id !== selectedCard._id));
-        setIsConfirmPopupOpen(false);
-        setIsPopupInAction(false);
+        setCards(cards.filter(item => item._id !== deletedCard._id));
+        setDeletedCard(null);
       })
       .catch(err => {console.log(err)})
-      .finally(() => { setSelectedCard({})});
+      .finally(() => {setIsPendingServerResponse(false)});
   }
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
-      <Header/>
+      <Header />
       <Main
-        cards={cards} 
+        cards={cards}
         onEditProfile={handleEditProfileClick}
         onAddPlace={handleAddPlaceClick}
         onEditAvatar={handleEditAvatarClick}
         onCardClick={handleCardClick}
         onCardLike={handleCardLike}
-        onCardDelete={handleCardDelete}/>
+        onCardDelete={handleCardDelete} />
       <Footer/>
       <EditProfilePopup 
         isOpen={isEditProfilePopupOpen}
-        isInAction={isPopupInAction}
-        onMouseDown={handlePopupMouseDown}
+        isPending={isPendingServerResponse}
+        onClose={closeAllPopups}
         onUpdateUser={handleUpdateUser} />
       <AddPlacePopup 
         isOpen={isAddPlacePopupOpen}
-        isInAction={isPopupInAction}
-        onMouseDown={handlePopupMouseDown}
-        onAddPlaceSubmit={handleAddPlaceSubmit}/>
+        isPending={isPendingServerResponse}
+        onClose={closeAllPopups}
+        onAddPlaceSubmit={handleAddPlaceSubmit} />
       <EditAvatarPopup 
         isOpen={isEditAvatarPopupOpen}
-        isInAction={isPopupInAction}
-        onMouseDown={handlePopupMouseDown} 
+        isPending={isPendingServerResponse}
+        onClose={closeAllPopups} 
         onUpdateAvatar={handleUpdateAvatar} />
       <PopupWithForm 
         name="confirm" 
         title="Вы уверены?"  
-        isOpen={isConfirmPopupOpen} 
-        onMouseDown={handlePopupMouseDown}>
-          <button className="popup-edit__button-save" type="submit" onClick={handleConfirmCardDelete}>
-            {isPopupInAction ? "Удаление...": "Да"}
-          </button>
+        isOpen={deletedCard !== null}
+        onClose={closeAllPopups}>
+        <button className="popup-edit__button-save" type="submit" onClick={handleConfirmCardDelete}>
+          {isPendingServerResponse ? "Удаление...": "Да"}
+        </button>
       </PopupWithForm>
-      <ImagePopup card={selectedCard} isOpen={isPreviewPopupOpen} onMouseDown={handlePopupMouseDown}/>
+      <ImagePopup card={selectedCard} onClose={closeAllPopups} />
     </CurrentUserContext.Provider>
   );
 }

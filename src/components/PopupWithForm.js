@@ -1,8 +1,15 @@
-function PopupWithForm({name, title, isOpen, children, onMouseDown}) {
+function PopupWithForm({name, title, isOpen, children, onClose}) {
+  const handlePopupMouseDown = (evt) => {
+    if (evt.target.classList.contains("popup__close-button")
+        || evt.target.classList.contains("popup")) {
+      onClose();
+    }
+  }
+
   return (
     <div 
-      className={`popup popup-edit popup-edit_type_${name} ${isOpen && 'popup_opened'}`}
-      onMouseDown={onMouseDown}>
+      className={`popup popup-edit popup-edit_type_${name} ${isOpen && "popup_opened"}`}
+      onMouseDown={handlePopupMouseDown}>
       <section className="popup-edit__container">
         <button 
           className="popup__close-button button" 
