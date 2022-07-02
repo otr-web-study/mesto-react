@@ -1,5 +1,5 @@
 import PopupWithForm from "./PopupWithForm";
-import {useInputRefWithValidation, useFormValid} from "../utils/FormValidators";
+import {useInputRefWithValidation, useFormValid} from "../utils/formValidators";
 
 function EditAvatarPopup({isOpen, isPending, onClose, onUpdateAvatar}) {
   const url = useInputRefWithValidation("", isOpen);

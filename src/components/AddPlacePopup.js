@@ -1,5 +1,5 @@
 import PopupWithForm from "./PopupWithForm";
-import {useInputWithValidation, useFormValid} from "../utils/FormValidators";
+import {useInputWithValidation, useFormValid} from "../utils/formValidators";
 
 function AddPlacePopup({isOpen, isPending, onClose, onAddPlaceSubmit}) {
   const link = useInputWithValidation("", isOpen);

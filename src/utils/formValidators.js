@@ -25,7 +25,7 @@ export const useInputWithValidation = (initialValue, isOpen) => {
 
   const resetInput = () => {
     setValue(initialValue);
-    setIsRedacted(true);
+    setIsRedacted(false);
     setIsValid(true);
   }
 
